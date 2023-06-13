@@ -5,6 +5,7 @@ import string
 from rest_framework import status
 from apps.authentication_app.models import User
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 
@@ -15,10 +16,10 @@ class Register(utils.BaseAPIView):
     Signup user
     """
 
-    serializer_class = serializers.RegisterSerializer
+    serializer_class = serializers.UserRegisterSerializer
 
     def post(self, request):
-        request.data._mutable = True
+        request.POST._mutable = True
         password = request.data.get("password")
         if not utils.password_check(password):
             return Response(
@@ -70,3 +71,47 @@ class Login(utils.BaseAPIView):
         data = serializer.data
         data["tokens"] = token
         return Response(data, status=status.HTTP_201_CREATED)
+
+
+class UserAPIView(utils.BaseAPIView):
+    """
+    Get, Update user information
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.CustomUserSerializer
+
+    def get(self, request):
+        user = User.objects.filter(id=request.user.id).first()
+        if not user:
+            return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = serializers.CustomUserSerializer(user)
+        return Response({"message": "successfully fetched", "data": serializer.data}, status=status.HTTP_200_OK)
+
+
+class UserLogoutAPIView(utils.BaseAPIView):
+    """
+    An endpoint to logout users.
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.UserLogoutSerializer
+
+    def post(self, request):
+        try:
+
+            serializer = self.serializer_class(data=request.data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            refresh_token = request.data["refresh"]
+            utils.black_list_token(refresh_token=refresh_token)
+
+            data = {
+                "message": "You have successfully logged out.",
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            data = {
+                "message": f"{e}",
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)

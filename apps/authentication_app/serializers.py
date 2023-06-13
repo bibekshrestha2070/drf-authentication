@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 # Register serializer
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "username", "password", "first_name", "last_name", "email")
@@ -62,3 +62,18 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "username", "email")
+
+
+class UserLogoutSerializer(serializers.Serializer):
+
+    refresh = serializers.CharField(required=True)
+    print("a")
+
+    def validate(self, data):
+        error = dict()
+
+        if "refresh" not in data:
+            error["refresh"] = "This field is required"
+        if not len(error) == 0:
+            raise serializers.ValidationError(error)
+        return data

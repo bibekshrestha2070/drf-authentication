@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.authentication_app",
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 MIDDLEWARE = [
@@ -117,11 +118,14 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=config("ACCESS_TOKEN_LIFE_HOURS", default=8, cast=int)),
-    "REFRESH_TOKEN_LIFETIME": timedelta(hours=config("REFRESH_TOKEN_LIFE_HOURS", default=168, cast=int)),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=config("ACCESS_TOKEN_LIFE", default=5, cast=int)),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=config("REFRESH_TOKEN_LIFE", default=1, cast=int)),
     "ALGORITHM": config("TOKEN_ALGORITHM", default="HS256"),
     "SIGNING_KEY": config("TOKEN_SIGNING_KEY", default="mytopsecret"),
     "USER_ID_FIELD": "id",
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
 }
 AUTH_USER_MODEL = "authentication_app.CustomUser"
 
