@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "rolepermissions",
 ]
 
 MIDDLEWARE = [
@@ -128,7 +129,7 @@ SIMPLE_JWT = {
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
 }
 AUTH_USER_MODEL = "authentication_app.CustomUser"
-
+ROLEPERMISSIONS_MODULE = "authentication.roles"
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
