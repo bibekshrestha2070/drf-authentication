@@ -6,6 +6,8 @@ from rest_framework import status
 from apps.authentication_app.models import User
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
+from rolepermissions.roles import assign_role
+from authentication.decorator import has_permission_decorator
 
 # Create your views here.
 
@@ -46,6 +48,8 @@ class Register(utils.BaseAPIView):
         if db_user:
             return Response({"message": "Duplicate email or username"}, status=status.HTTP_400_BAD_REQUEST)
         user = serializer.save()
+
+        assign_role(user, "user")
         return Response(
             {
                 "user": serializers.UserSerializer(user, context=self.get_serializer_context()).data,
@@ -81,8 +85,10 @@ class UserAPIView(utils.BaseAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.CustomUserSerializer
 
-    def get(self, request):
+    @has_permission_decorator("view_profile")
+    def get(self, request, *args, **kwargs):
         user = User.objects.filter(id=request.user.id).first()
+        print(request.user)
         if not user:
             return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = serializers.CustomUserSerializer(user)
@@ -99,7 +105,6 @@ class UserLogoutAPIView(utils.BaseAPIView):
 
     def post(self, request):
         try:
-
             serializer = self.serializer_class(data=request.data)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
