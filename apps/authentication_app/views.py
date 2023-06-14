@@ -87,11 +87,11 @@ class UserAPIView(utils.BaseAPIView):
 
     @has_permission_decorator("view_profile")
     def get(self, request, *args, **kwargs):
-        user1 = User.objects.filter(id=request.user.id).first()
+        user = User.objects.filter(id=request.user.id).first()
         print(request.user)
-        if not user1:
+        if not user:
             return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
-        serializer = serializers.CustomUserSerializer(user1)
+        serializer = serializers.CustomUserSerializer(user)
         return Response({"message": "successfully fetched", "data": serializer.data}, status=status.HTTP_200_OK)
 
 
