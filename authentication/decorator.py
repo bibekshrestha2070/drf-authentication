@@ -18,7 +18,7 @@ def _role_permission_checker(function, subject, redirect_to_login, redirect_url)
             user = request.user
             if user_is_authenticated(user):
                 if function(user, subject):
-                    return dispatch(request, *args, **kwargs)
+                    return dispatch(self, request, *args, **kwargs)
 
             if redirect_url:
                 return dj_redirect(redirect_url)
